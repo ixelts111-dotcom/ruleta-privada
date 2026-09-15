@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel privado</title>
+<style>
+body{margin:0;min-height:100vh;background:#111;color:#fff;font-family:Arial;display:flex;justify-content:center;align-items:center}
+.box{width:min(92vw,450px);background:#222;padding:30px;border-radius:18px}h1{margin-top:0}
+input,button{width:100%;padding:13px;margin:7px 0;border-radius:9px;font-size:16px}
+input{background:#111;color:white;border:1px solid #555}button{border:0;background:#ffd400;font-weight:bold;cursor:pointer}
+#msg{margin-top:15px;color:#ffd400;line-height:1.5}.links{display:none;margin-top:20px;padding:15px;background:#151515;border-radius:10px}
+code{word-break:break-all}
+</style>
+</head>
+<body><div class="box">
+<h1>🔐 Panel privado</h1>
+<p>Solo tú debes entrar aquí. Elige el número ganador y guárdalo.</p>
+<input id="pass" type="password" placeholder="Contraseña de administrador">
+<input id="num" type="number" min="1" max="100" placeholder="Número ganador (1–100)">
+<button id="save">GUARDAR GANADOR</button>
+<div id="msg"></div>
+<div class="links" id="links">
+<b>Link público:</b><br><code id="public"></code><br><br>
+<b>Panel privado:</b><br><code id="private"></code>
+</div>
+</div>
+<script>
+const msg=document.getElementById("msg");
+document.getElementById("save").onclick=async()=>{
+const password=document.getElementById("pass").value,n=Number(document.getElementById("num").value);
+if(!password||!Number.isInteger(n)||n<1||n>100){msg.textContent="Escribe la contraseña y un número del 1 al 100.";return}
+let r=await fetch("/api/admin/winner",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password,winner:n})});
+let d=await r.json();
+if(d.ok){msg.textContent="✅ Ganador guardado. Ya puedes compartir el link público.";document.getElementById("links").style.display="block";document.getElementById("public").textContent=location.origin+"/";document.getElementById("private").textContent=location.origin+"/admin";}
+else msg.textContent="❌ "+d.error;
+};
+</script></body></html>
